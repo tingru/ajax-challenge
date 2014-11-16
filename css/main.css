@@ -18,3 +18,49 @@ body {
 .error-message{
     color: #FF0000;
 }
+
+label {
+    font-size: 120%;
+    margin-top: 0;
+    margin-bottom: 0.25em;
+}
+
+.sort-ui, .filter-ui {
+    margin-bottom: 1em;
+}
+
+.reviews {
+    margin: 0;
+    padding: 0;
+}
+
+.review {
+    list-style: none;
+    padding: 10px;
+    margin-bottom: 0.5em;
+    border: 1px solid #CCC;
+    background-color: #EEE;
+    border-radius: 5px;
+    clear: both;
+}
+
+.review img {
+    float: left;
+    max-width: 150px;
+    border-radius: 5px;
+}
+
+.review .details {
+    padding-left: 170px;
+}
+
+.review .name,
+.review .title,
+.review p {
+    margin-top: 0;
+    margin-bottom: 0.25em;
+}
+
+.review .title {
+    font-size: 150%;
+}

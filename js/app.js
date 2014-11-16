@@ -1,8 +1,5 @@
 "use strict";
-/*
-    app.js, main Angular application script
-    define your module and controllers here
-*/
+
 document.getElementById("form-comment").addEventListener("submit", onSubmit);
 
 function onSubmit(evt) {
@@ -53,7 +50,8 @@ function validateString(field) {
 
 
 var commentsUrl = 'https://api.parse.com/1/classes/ajaxcomments';
-var errorMessage = document.getElementById("comment-message");
+var errorMessage = document.getElementById("error-message");
+var messageBox = document.getElementById("message-box");
 
 angular.module('CommentsApp', ['ui.bootstrap'])
     .config(function ($httpProvider) {
@@ -66,20 +64,21 @@ angular.module('CommentsApp', ['ui.bootstrap'])
             $http.get(commentsUrl)
                 .success(function (data) {
                     $scope.comments = data.results;
+                    errorMessage.style.display = "none";
+                    if($scope.comments == 0) {
+                        messageBox.style.display = "block";
+                    } else {
+                        messageBox.style.display = "none";
+                    }
                 })
-                .finally(function () {
+                .error(function (err) {
+                    errorMessage.style.display = "block";
+                    errorMessage.innerHTML = err.error;
+                }).finally(function () {
                     $scope.updating = false;
                 });
         };
-        $scope.refreshComments();
-
-        $scope.newComment = {
-            rating: null,
-            name: '',
-            title: '',
-            body: ''
-        };
-
+        
         $scope.addComment = function () {
             $scope.updating = true;
             if ($scope.newComment.rating == null || $scope.newComment.name == '' || $scope.newComment.title == '' || $scope.newComment.body == '') {
@@ -93,6 +92,8 @@ angular.module('CommentsApp', ['ui.bootstrap'])
                 $scope.updating = false;
                 return;
             }
+            // to enable onSubmit
+            $scope.updating = false;
             $http.post(commentsUrl, $scope.newComment)
                 .success(function (responseData) {
                     $scope.newComment.objectId = responseData.objectId;
@@ -101,8 +102,24 @@ angular.module('CommentsApp', ['ui.bootstrap'])
                         rating: null,
                         name: '',
                         title: '',
-                        body: ''
+                        body: '',
+                        score: 0
                     };
+                    errorMessage.style.display = "none";
+                })
+                .error(function (err) {
+                    errorMessage.style.display = "block";
+                    errorMessage.innerHTML = err.error;
+                });
+        };
+
+        $scope.deleteComment = function (comment) {
+            $scope.updating = true;
+
+            $http.delete(commentsUrl + '/' + comment.objectId, comment)
+                .success(function () {
+                    $scope.refreshComments();
+                    errorMessage.style.display = "none";
                 })
                 .error(function (err) {
                     errorMessage.style.display = "block";
@@ -113,15 +130,41 @@ angular.module('CommentsApp', ['ui.bootstrap'])
                 });
         };
 
-        $scope.deleteComment = function (comment) {
+        $scope.updateScore = function (comment, increase) {
+            if (!increase && comment.score == 0) {
+                return;
+            }
             $scope.updating = true;
-
-            $http.delete(commentsUrl + '/' + comment.objectId, comment)
-                .success(function () {
-                    $scope.refreshComments();
+            var amount = increase ? 1 : -1;
+            $scope.score = {
+                score: {
+                    __op: 'Increment',
+                    amount: amount
+                }
+            };
+            
+            $http.put(commentsUrl + '/' + comment.objectId, $scope.score)
+                .success(function (responseData) {
+                    comment.score = responseData.score;
+                })
+                .error(function (err) {
+                    errorMessage.style.display = "block";
+                    errorMessage.innerHTML = err.error;
                 })
                 .finally(function () {
                     $scope.updating = false;
                 });
         };
+
+        $scope.newComment = {
+            rating: null,
+            name: '',
+            title: '',
+            body: '',
+            score: 0
+        };
+
+        $scope.sortCol = 'score';
+        $scope.refreshComments();
+        $scope.sortReverse = true;
     });

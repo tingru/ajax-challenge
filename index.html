@@ -18,17 +18,9 @@
 
             <section>
                 <h2>Add a Comment</h2>
-                <!--
-            put a form here for entering a new comment
-            the user must select a rating, and enter a name, title, and comment body
-            before the comment can be saved to the server
-            for the rating selection, use the Angular Bootstrap Rating directive
-            http://angular-ui.github.io/bootstrap/#/rating
-            their script file is included below
-            -->
-                <form id="form-comment">
+                <form id="form-comment" class="form-comment">
                     <div class="form-rating">
-                        <label for="comment-rating">Rate this</label>
+                        <label for="comment-rating">Rate this: </label>
                         <rating id="comment-rating" name="comment-rating" max="5" ng-model="newComment.rating"></rating>
                     </div>
 
@@ -47,10 +39,11 @@
                         <textarea class="form-control" id="comment-body" name="comment-body" rows="4" ng-model="newComment.body" placeholder="Write your review here"></textarea>
                     </div>
 
-                    <div class="form-action">
-                        <p id="comment-message" class="error-message"></p>
-                        <button type="submit" class="btn btn-success btn-lg" ng-disabled="updating" ng-click="addComment()">Submit your review!</button>
+                    <br/>
+                    <div class="form-action">                        
+                        <button type="submit" class="btn btn-primary btn-lg" ng-click="addComment()">Submit your review!</button>                        
                     </div>
+                    <p id="error-message" class="error-message"></p>
                 </form>
 
             </section>
@@ -64,17 +57,26 @@
              -->
                 <img src="img/ajax-spinner.gif" alt="ajax animation" ng-if="updating" />
                 <ul class="reviews">
-                    <li class='review' ng-repeat="comment in comments">
+                    <p id="message-box">No one has reviewed this yet.</p>
+                    <li class='review' ng-repeat="comment in comments = (comments | orderBy : sortCol : sortReverse)">
+                        <img src="img/default-icon.png" alt="Default user icon" width="120px" height="120px">
                         <div class="details">
                             <h3 class="name">{{comment.name}}</h3>
-                            <rating max="5" ng-model="comment.ratings" readonly="true"></rating><br>
+                            <rating max="5" ng-model="comment.rating" readonly="true"></rating><br>
                             <p class="title">{{comment.title}}</p>
                             <p class="body">{{comment.body}}</p>
+                            <div>
+                                {{comment.score}} Was this helpful?
+                                <button type="button" class="btn btn-success btn-sm" ng-click="updateScore(comment, true)">
+                                    <span class="glyphicon glyphicon-thumbs-up"></span> yes
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm" ng-click="updateScore(comment, false)">
+                                    <span class="glyphicon glyphicon-thumbs-down"></span> no
+                                </button>
+                            </div>
                         </div>
 
-                        <button class="btn btn-default" ng-disabled="updating" ng-click="deleteComment(comment)">
-                            Delete comment
-                        </button>
+                        <button class="btn btn-danger  btn-sm" ng-disabled="updating" ng-click="deleteComment(comment)">Delete review</button>
                     </li>
                 </ul>
             </section>
